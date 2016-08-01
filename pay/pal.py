@@ -19,19 +19,23 @@ TIMEOUT = 6
 
 
 def create_transaction():
-    code = 1  # 1: successful, 2: timeout, 3: other reasons
     params = {'amount': amount, 'pin': PIN, 'callback': callback, 'description': description}
     try:
-        r = req.get(PAL_CREATE_URL, data=params, timeout=TIMEOUT)
+        r = req.post(PAL_CREATE_URL, data=params, timeout=TIMEOUT)
+        print "~~~~~~ create transaction: " + r.text
+        code = 1  # 1: successful, 2: timeout, 3: other reasons
         new_transid = r.text
-        return code, new_transid
+        if len(new_transid) > 20:
+            raise ValueError
+        else:
+            return code, new_transid
     except req.exceptions.Timeout:
         code = 2
-        dummy = 'blah blah'
+        dummy = 'timeout'
         return code, dummy
     except:
         code = 3
-        dummy = 'blah blah'
+        dummy = 'connection failed'
         return code, dummy
 
 
@@ -39,7 +43,7 @@ def verify_transaction(transid):
     # return values --> 1: successful, 2: timeout, 3: other reasons
     params = {'transid': transid, 'pin': PIN, 'amount': amount}
     try:
-        r = req.get(PAL_VERIFY_URL, data=params, timeout=TIMEOUT)
+        r = req.post(PAL_VERIFY_URL, data=params, timeout=TIMEOUT)
         return r.text
     except req.exceptions.Timeout:
         return 2
@@ -48,5 +52,4 @@ def verify_transaction(transid):
 
 
 def get_pay_link(transid):
-    return PAL_PAY_URL + transid
-
+    return str(PAL_PAY_URL) + str(transid)

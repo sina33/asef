@@ -32,8 +32,9 @@ class States:
 
 
 class Misc:
+    free_membership = "در حال حاضر، شما عضو ربات روان‌یار هستید."
     timeout_msg = "خطا در برقراری ارتباط با درگاه پرداخت. لطفا مجددا تلاش کنید"
-    my_account = "حساب من"
+    my_account = "در این قسمت می توانید از وضعیت اشتراک خود باخبر شوید یا اطلاعات حساب خود را ویرایش کنید."
     unknown_state = "unknown state, you shouldn't be in here"
     pay_msg = 'لطفا جهت پرداخت از لینک زیر اقدام نمایید' + '\n'
     pay_msg += "پس از پرداخت برای مطلع شدن از وضعیت حساب کاربری خود به قسمت 'عضویت' حساب خود مراجعه کنید"
@@ -54,6 +55,8 @@ class Misc:
     link = '@ravanyaarbot'
     back_to_main_menu_message = 'شما به منوی اصلی بازگشته اید'
     contact_no = 'شماره تماس'
+
+
 
 
 class Label:

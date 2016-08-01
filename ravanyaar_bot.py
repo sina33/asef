@@ -5,20 +5,20 @@ import random
 import threading
 import time
 from collections import OrderedDict
-from commands import Commands, States, Misc, Label
+from logic.commands import Commands, States, Misc, Label
 from datetime import datetime
 
 import pytz
-import survey1
+import content.survey1 as survey1
 import telepot
-import utils
-from survey1 import profile_gender_options
+import logic.utils as utils
+from content.survey1 import profile_gender_options
 from telepot.delegate import create_open, per_from_id
 from telepot.exception import IdleTerminate
 from telepot.helper import UserHandler
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardHide
-from utils import markdown
+from logic.utils import markdown
 
 from content import survey2
 from database import db_ops
@@ -41,17 +41,18 @@ def ask(chat, q_num):
     o = survey1.OPTIONS  # survey.get_options()
     q = survey1.get_question(q_num - 1)
     markup = ReplyKeyboardMarkup(keyboard=[[o[2], o[1]], [o[3]], [o[5], o[4]]])
-    bot.sendMessage(chat, markdown(q), reply_markup=markup, parse_mode='Markdown')
+    bot.sendMessage(chat, q, reply_markup=markup)
 
 
 def ask_profile(chat, sub_state):
     q = survey1.USER_INFO_QUESTIONS
     if sub_state == 'Gender':
         markup = ReplyKeyboardMarkup(
-            keyboard=[['زن'], ['مرد']], one_time_keyboard=True, resize_keyboard=True)
+            keyboard=[['زن'], ['مرد'], [Commands.to_main_menu]], one_time_keyboard=True )  # resize_keyboard=True)
         bot.sendMessage(chat, q[0], reply_markup=markup)
     elif sub_state == 'Age':
-        li = [[str(i)] for i in range(1300, 1390)]
+        li = [[str(i)] for i in utils.age_range()]
+        li.append([Commands.to_main_menu])
         markup = ReplyKeyboardMarkup(keyboard=li, resize_keyboard=True)
         bot.sendMessage(chat, q[1], reply_markup=markup)
 
@@ -168,8 +169,9 @@ class UserHandlerSubclass(UserHandler):
                     ask(chat_id, 1)
 
                 elif message == cmd.test2:
-                    self.fsm.test2()
-                    ask2(chat_id, 1)
+                    # self.fsm.test2()
+                    # ask2(chat_id, 1)
+                    bot.sendMessage(chat_id, "به زودی...")
 
                 elif message == cmd.profile:
                     self.fsm.profile()
@@ -181,30 +183,32 @@ class UserHandlerSubclass(UserHandler):
                     bot.sendMessage(chat_id, Misc.my_account, reply_markup=markup)
 
                 elif message == cmd.membership:
-                    membership, transid = db_ops.get_membership_status(self.user_id)
-                    if membership == 'gold':
-                        bot.sendMessage(self.user_id, Misc.golden_user_msg)
-                    elif transid is not None:
-                        code = pal.verify_transaction(transid)
-                        if code.isdigit() and int(code) == 1:
-                            db_ops.set_membership(self.user_id, 'gold')
-                            bot.sendMessage(self.user_id, Misc.golden_user_new)
-                        else:
-                            pay_link = pal.get_pay_link(transid)
-                            markup = InlineKeyboardMarkup(inline_keyboard=[
-                                [InlineKeyboardButton(text='پرداخت', url=pay_link, callback_data='payment')]])
-                            bot.sendMessage(chat_id, Misc.pay_msg, reply_markup=markup)
-                    else:
-                        # bot.sendMessage(self.user_id, "آیا مایل هستید با پرداخت مبلغ پنج هزار تومان عضو طلایی روان‌یار شده و از خدمات کامل آن استفاده کنید؟")
-                        code, transid = pal.create_transaction()
-                        if code == 1:  # successful
-                            db_ops.save_transaction(self.user_id, transid)
-                            pay_link = pal.get_pay_link(transid)
-                            markup = InlineKeyboardMarkup(inline_keyboard=[
-                                [InlineKeyboardButton(text='پرداخت', url=pay_link, callback_data='payment')]])
-                            bot.sendMessage(chat_id, Misc.pay_msg, reply_markup=markup)
-                        else:  # timeout and other reasons
-                            bot.sendMessage(self.user_id, Misc.timeout_msg)
+                    bot.sendMessage(chat_id, Misc.free_membership)
+                    # membership, transid = db_ops.get_membership_status(self.user_id)
+                    # print membership, transid
+                    # if membership == 'gold':
+                    #     bot.sendMessage(self.user_id, Misc.golden_user_msg)
+                    # elif transid is not None:
+                    #     code = pal.verify_transaction(transid)
+                    #     if code.isdigit() and int(code) == 1:
+                    #         db_ops.set_membership(self.user_id, 'gold')
+                    #         bot.sendMessage(self.user_id, Misc.golden_user_new)
+                    #     else:
+                    #         pay_link = pal.get_pay_link(transid)
+                    #         markup = InlineKeyboardMarkup(inline_keyboard=[
+                    #             [InlineKeyboardButton(text='پرداخت', url=pay_link, callback_data='payment')]])
+                    #         bot.sendMessage(chat_id, Misc.pay_msg, reply_markup=markup)
+                    # else:
+                    #     code, transid = pal.create_transaction()
+                    #     if code == 1:  # successful
+                    #         db_ops.save_transaction(self.user_id, transid)
+                    #         pay_link = pal.get_pay_link(transid)
+                    #         print pay_link
+                    #         markup = InlineKeyboardMarkup(inline_keyboard=[
+                    #             [InlineKeyboardButton(text='پرداخت', url=pay_link, callback_data='payment')]])
+                    #         bot.sendMessage(chat_id, Misc.pay_msg, reply_markup=markup)
+                    #     else:  # timeout and other reasons
+                    #         bot.sendMessage(self.user_id, Misc.timeout_msg)
 
                 elif message == cmd.share_contact:
                     markup = ReplyKeyboardMarkup(keyboard=[
@@ -218,7 +222,7 @@ class UserHandlerSubclass(UserHandler):
 
                 elif message == cmd.help:
                     markup = get_main_menu_keyboard_markup()
-                    bot.sendMessage(chat_id, survey1.help_msg, reply_markup=markup)
+                    bot.sendMessage(chat_id, survey1.help_message, reply_markup=markup)
 
                 elif message == cmd.to_main_menu:
                     markup = get_main_menu_keyboard_markup()
@@ -257,7 +261,7 @@ class UserHandlerSubclass(UserHandler):
                                     bot.sendMessage(self.user_id, survey1.duplicate_answer_warning1)
                                     ask(chat_id, q_num)
                                 else:
-                                    # wait before as
+                                    # wait before ask
                                     bot.sendChatAction(chat_id, 'typing')
                                     self.thread = threading.Timer(1.4, self.wait_before_ask)
                                     self.thread.start()
@@ -300,15 +304,22 @@ class UserHandlerSubclass(UserHandler):
                     # ----- Profile -----
                     elif self.fsm.get_state_prefix() == States.profile:
                         response = (msg['text']).encode('utf-8')
-                        if self.fsm.get_state_as_list()[1] == 'Gender':
+                        markup = get_main_menu_keyboard_markup()
+                        if response == Commands.to_main_menu:
+                            self.fsm.reset()
+                            bot.sendMessage(self.user_id, Misc.back_to_main_menu_message, reply_markup=markup)
+                        elif self.fsm.get_state_as_list()[1] == 'Gender':
                             if response in profile_gender_options.keys():
                                 db_ops.save_profile(chat_id, 'gender', profile_gender_options[response])
-                            self.fsm.next_q()
-                            ask_profile(chat_id, self.fsm.get_state_as_list()[1])
-                        elif response.isdigit():
-                            db_ops.save_profile(chat_id, 'age', response)
+                                self.fsm.next_q()
+                                ask_profile(chat_id, self.fsm.get_state_as_list()[1])
+                            else:
+                                bot.sendMessage(self.user_id, survey1.invalid_input)
+                        elif response in utils.age_range():  # sub_state equals 'Age'
+                            for i, item in enumerate(utils.age_range()):
+                                if response == item:
+                                    db_ops.save_profile(chat_id, 'age', i)
                             self.fsm.reset()
-                            markup = get_main_menu_keyboard_markup()
                             bot.sendMessage(chat_id, survey1.info_complete, reply_markup=markup)
                         else:
                             bot.sendMessage(chat_id, survey1.invalid_input, reply_markup=ReplyKeyboardHide())

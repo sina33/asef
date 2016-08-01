@@ -1,4 +1,5 @@
-import survey1
+# coding=utf-8
+import content.survey1 as survey1
 
 from content.survey2 import OPTIONS, t1, t3
 
@@ -46,3 +47,11 @@ def parse_answer_value_for_test2(user_input, part, dream_cat=0):
 
 def markdown(msg):
     return "`" + msg + "`"
+
+
+def age_range():
+    bounds = [14, 20, 25, 30, 35, 40, 45, 50]
+    my_list = ["بین {0} تا {1} سال".format(bounds[i] + 1, bounds[i + 1]) for i, item in enumerate(bounds[0:-1])]
+    my_list.insert(0, 'کمتر از {0}'.format(bounds[0] + 1))
+    my_list.append('بالای {0}'.format(bounds[-1] + 1))
+    return my_list
