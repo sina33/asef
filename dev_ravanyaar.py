@@ -414,8 +414,8 @@ class UserHandlerSubclass(UserHandler):
 
 
 if __name__ == "__main__":
-    # TOKEN = '228572738:AAFAZf9U3i1yt1si2ft4Cz-94cLEYmTiRx4'  # RavanYaarDevBot
-    TOKEN = '232659175:AAHpIcg5Dax6r_15ZlOwTwSkuUEeE1wVWME'  # RavanYaarBot
+    TOKEN = '228572738:AAFAZf9U3i1yt1si2ft4Cz-94cLEYmTiRx4'  # RavanYaarDevBot
+    # TOKEN = '232659175:AAHpIcg5Dax6r_15ZlOwTwSkuUEeE1wVWME'  # RavanYaarBot
     # bot = telepot.Bot(TOKEN)
     users_info_group_id = -116540547
     bot = telepot.DelegatorBot(TOKEN, [

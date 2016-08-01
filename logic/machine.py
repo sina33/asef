@@ -26,7 +26,7 @@ class BotMachine(HierarchicalMachine):
         thread.start()
 
     def threaded_function(_id):
-        from ravanyaar_bot import bot
+        from dev_ravanyaar import bot
         from telepot.namedtuple import ReplyKeyboardHide
         bot.sendMessage(_id, 'awake time', reply_markup=ReplyKeyboardHide())
 
