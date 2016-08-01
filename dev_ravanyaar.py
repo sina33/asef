@@ -411,14 +411,14 @@ class UserHandlerSubclass(UserHandler):
         info['Total_Users'] = total
         self.new_user = False
 
-        output = "\n".join(["{k}: {v},".format(k=key, v=info[key]) for key in info.iterkeys()])
+        output = "\n".join(["{k}: {v}".format(k=key, v=info[key]) for key in info.iterkeys()])
         bot.sendMessage(users_info_group_id, _now + output)
                         # json.dumps(info, indent=2, separators=(',', ': '), encoding='utf-8'))  # .encode('utf-8'))
 
 
 if __name__ == "__main__":
-    TOKEN = '228572738:AAFAZf9U3i1yt1si2ft4Cz-94cLEYmTiRx4'  # RavanYaarDevBot
-    # TOKEN = '232659175:AAHpIcg5Dax6r_15ZlOwTwSkuUEeE1wVWME'  # RavanYaarBot
+    # TOKEN = '228572738:AAFAZf9U3i1yt1si2ft4Cz-94cLEYmTiRx4'  # RavanYaarDevBot
+    TOKEN = '232659175:AAHpIcg5Dax6r_15ZlOwTwSkuUEeE1wVWME'  # RavanYaarBot
     # bot = telepot.Bot(TOKEN)
     users_info_group_id = -116540547
     debugging_group_id = -165690520
