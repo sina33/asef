@@ -3,7 +3,11 @@ from transitions.extensions.nesting import NestedState
 
 
 class BotMachine(HierarchicalMachine):
-    def after_all(self): print self.state
+    def before_transition(self):
+        print "::::: from ( " + self.state + " ) :::"
+
+    def after_transition(self):
+        print "::: to ( " + self.state + " ) :::::"
 
     def get_q_num(self):
         return int(self.state.split(">")[-1])
@@ -42,17 +46,18 @@ class BotMachine(HierarchicalMachine):
                   'Admin'
                   ]
         transitions = [
-            ['reset', '*', 'Main'],
             ['profile', 'Main', 'Profile>Gender'],
             ['next_q', 'Profile>Gender', 'Profile>Age'],
             ['test1', 'Main', 'Test1>1'],
             ['result1', 'Test1>10', 'Result1'],
             ['test2', 'Main', 'Test2>1'],
             ['result2', 'Test2>3>7', 'Result2'],
+            ['reset', '*', 'Main'],
             ['admin', '*', 'Admin']
         ]
-        HierarchicalMachine.__init__(self, states=states, transitions=transitions, initial='Main',
-                                     after_state_change='after_all')
+        HierarchicalMachine.__init__(self, states=states, transitions=transitions, initial='Main')
+                                     # before_state_change='before_transition',
+                                     # after_state_change='after_transition')
         st_list = list(['Test1>{0}'.format(i) for i in range(1, 11)])
         st_list.append('Result1')
         self.add_ordered_transitions(trigger='next_q', states=st_list, loop=False)

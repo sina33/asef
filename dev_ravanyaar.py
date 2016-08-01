@@ -48,12 +48,12 @@ def ask_profile(chat, sub_state):
     q = survey1.USER_INFO_QUESTIONS
     if sub_state == 'Gender':
         markup = ReplyKeyboardMarkup(
-            keyboard=[['زن'], ['مرد'], [Commands.to_main_menu]], one_time_keyboard=True )  # resize_keyboard=True)
+            keyboard=[['زن'], ['مرد'], [Commands.to_main_menu]], one_time_keyboard=True)  # resize_keyboard=True)
         bot.sendMessage(chat, q[0], reply_markup=markup)
     elif sub_state == 'Age':
         li = [[str(i)] for i in utils.age_range()]
         li.append([Commands.to_main_menu])
-        markup = ReplyKeyboardMarkup(keyboard=li, resize_keyboard=True)
+        markup = ReplyKeyboardMarkup(keyboard=li)
         bot.sendMessage(chat, q[1], reply_markup=markup)
 
 
@@ -224,9 +224,9 @@ class UserHandlerSubclass(UserHandler):
                     markup = get_main_menu_keyboard_markup()
                     bot.sendMessage(chat_id, survey1.help_message, reply_markup=markup)
 
-                elif message == cmd.to_main_menu:
-                    markup = get_main_menu_keyboard_markup()
-                    bot.sendMessage(chat_id, Label.main_menu, reply_markup=markup)
+                # elif message == cmd.to_main_menu:
+                #     markup = get_main_menu_keyboard_markup()
+                #     bot.sendMessage(chat_id, Label.main_menu, reply_markup=markup)
 
                 # For Debugging
                 ##########
@@ -387,7 +387,7 @@ class UserHandlerSubclass(UserHandler):
         db_ops.set_state(self.user_id, self.fsm.state)
         # self.notify_user('Bye Bye.\n(last state:%s)' % self.fsm.state)
         if exception is not None and not isinstance(exception, IdleTerminate):
-            bot.sendMessage(users_info_group_id, str(exception))
+            bot.sendMessage(debugging_group_id, str(exception))
         print_terminal('%s %d: closed' % (type(self).__name__, self.id))
 
     def wait_before_ask(self):
@@ -398,7 +398,7 @@ class UserHandlerSubclass(UserHandler):
         bot.sendMessage(self.user_id, msg)
 
     def new_user_notification(self, msg):
-        _now = str(datetime.now(tz=pytz.timezone('Asia/Tehran')).strftime('%Y-%m-%d %H:%M:%S')) + '\n'
+        _now = str(datetime.now(tz=pytz.timezone('Asia/Tehran')).strftime('%Y-%m-%d  %H:%M:%S')) + '\n'
         info = OrderedDict(chat_id=self.user_id)
         if 'from' in msg.keys():
             if 'username' in msg['from'].keys():
@@ -410,7 +410,10 @@ class UserHandlerSubclass(UserHandler):
         total = db_ops.add_user(self.user_id)
         info['Total_Users'] = total
         self.new_user = False
-        bot.sendMessage(users_info_group_id, _now + str(json.dumps(info, indent=2, separators=(',', ': '))))
+
+        output = "\n".join(["{k}: {v},".format(k=key, v=info[key]) for key in info.iterkeys()])
+        bot.sendMessage(users_info_group_id, _now + output)
+                        # json.dumps(info, indent=2, separators=(',', ': '), encoding='utf-8'))  # .encode('utf-8'))
 
 
 if __name__ == "__main__":
@@ -418,6 +421,7 @@ if __name__ == "__main__":
     # TOKEN = '232659175:AAHpIcg5Dax6r_15ZlOwTwSkuUEeE1wVWME'  # RavanYaarBot
     # bot = telepot.Bot(TOKEN)
     users_info_group_id = -116540547
+    debugging_group_id = -165690520
     bot = telepot.DelegatorBot(TOKEN, [
         (per_from_id(flavors='all'), create_open(UserHandlerSubclass, timeout=20)),
         # (per_application(), create_open(OneInstanceOnly)),
