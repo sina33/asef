@@ -357,7 +357,9 @@ class UserHandlerSubclass(UserHandler):
                     bot.sendMessage(from_id, text=survey1.FEEDBACK[index][int(res_array[index])])
                     box_state = db_ops.get_box(from_id)
                     box_state = list('xxxxx') if box_state is None else list(box_state)
+                    o_cnt1 = box_state.count('o')
                     box_state[index] = 'o'
+                    o_cnt2 = box_state.count('o')
                     db_ops.save_box(from_id, box_state)
                     markup = get_gift_box_keyboard_markup(''.join([str(i) for i in box_state]), index)
                     bot.sendMessage(from_id, survey1.box_opened, reply_markup=markup)
@@ -367,6 +369,8 @@ class UserHandlerSubclass(UserHandler):
                     # message_with_inline_keyboard = bot.sendMessage(from_id, survey1.box_opened)
                     # else:
                     # bot.answerCallbackQuery(query_id, text='No previous message to edit')
+                    if o_cnt2 > o_cnt1 and o_cnt2 == 5:
+                        bot.sendMessage(from_id, survey1.bot_intro_msg)
 
                 elif data == 'alert':
                     bot.answerCallbackQuery(query_id, text='Alert!', show_alert=True)
@@ -417,8 +421,8 @@ class UserHandlerSubclass(UserHandler):
 
 
 if __name__ == "__main__":
-    # TOKEN = '228572738:AAFAZf9U3i1yt1si2ft4Cz-94cLEYmTiRx4'  # RavanYaarDevBot
-    TOKEN = '232659175:AAHpIcg5Dax6r_15ZlOwTwSkuUEeE1wVWME'  # RavanYaarBot
+    TOKEN = '228572738:AAFAZf9U3i1yt1si2ft4Cz-94cLEYmTiRx4'  # RavanYaarDevBot
+    # TOKEN = '232659175:AAHpIcg5Dax6r_15ZlOwTwSkuUEeE1wVWME'  # RavanYaarBot
     # bot = telepot.Bot(TOKEN)
     users_info_group_id = -116540547
     debugging_group_id = -165690520
